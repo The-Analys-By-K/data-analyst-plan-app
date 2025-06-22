@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12-Week Data Analyst Plan Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            /* Darker bg for contrast */
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+
+        .details {
+            color: #d1d5db;
+            /* Lighter gray for details */
+            padding-left: 0.75rem;
+            border-left: 2px solid #374151;
+        }
+
+        .details strong {
+            color: #93c5fd;
+            /* Light blue for emphasis */
+        }
+
+        /* Styles for Gemini Modal Response */
+        #gemini-response h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #67e8f9;
+            /* Cyan */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #gemini-response ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #gemini-response li {
+            margin-bottom: 0.5rem;
+        }
+
+        #gemini-response p {
+            margin-bottom: 0.75rem;
+        }
+
+        #gemini-response strong {
+            color: #e5e7eb;
+        }
+
+        .nav-btn.active {
+            background-color: #0891b2;
+            /* Cyan-600 */
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body class="text-white antialiased">
+
+    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-screen-2xl">
+
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2">Your 12-Week Intensive Data
+                Analyst Job Plan</h1>
+            <p class="text-lg text-gray-400">Track your journey from skill-building to job offer.</p>
+            <div id="user-info" class="mt-4 text-xs text-gray-500">
+                <p>Loading user data...</p>
+            </div>
+        </header>
+
+        <!-- Overall Progress -->
+        <div
+            class="mb-6 sticky top-4 z-20 bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-700">
+            <h2 class="text-xl font-semibold mb-3 text-center">Overall Progress</h2>
+            <div class="bg-gray-700 rounded-full h-4">
+                <div id="overall-progress-bar"
+                    class="bg-gradient-to-r from-cyan-500 to-blue-500 h-4 rounded-full progress-bar-inner"></div>
+            </div>
+            <p id="overall-progress-text" class="text-center text-sm mt-2 text-gray-300">Calculating...</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="mb-8 flex justify-center space-x-2 sm:space-x-4 bg-gray-800 p-2 rounded-xl">
+            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
+                data-phase="1">Phase 1: Foundation & Brand</button>
+            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
+                data-phase="2">Phase 2: Application Offensive</button>
+            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
+                data-phase="3">Phase 3: Closing the Deal</button>
+        </nav>
+
+        <!-- Main Content Grid -->
+        <div id="plan-container">
+            <!-- Phase content will be injected here -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-16 text-center">
+            <button id="reset-button"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300 shadow-md">
+                Reset All Progress
+            </button>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full border border-gray-700">
+            <h3 class="text-2xl font-bold mb-4">Are you sure?</h3>
+            <p class="text-gray-300 mb-6">This will permanently reset all your progress. This action cannot be undone.
+            </p>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-reset"
+                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button id="confirm-reset"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini AI Modal -->
+    <div id="gemini-modal"
+        class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 shadow-2xl max-w-2xl w-full border border-gray-700 flex flex-col"
+            style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h3 id="gemini-modal-title" class="text-2xl font-bold text-cyan-400">✨ AI Assistant</h3>
+                <button id="close-gemini-modal" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+            </div>
+            <div id="gemini-modal-content" class="text-gray-300 mb-6 overflow-y-auto">
+                <div id="gemini-loading" class="flex items-center justify-center p-8 hidden">
+                    <svg class="animate-spin h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    <p class="ml-4">Generating insights...</p>
+                </div>
+                <div id="gemini-response" class="prose prose-invert prose-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DATA STRUCTURE (WITH NAMED RESOURCES) ---
+        const planData = {
+            "Phase 1: Sharpening the Axe & Building Your Brand (Weeks 1-4)": {
+                "Week 1: Foundation & SQL Deep Dive": {
+                    "Monday": [
+                        { id: "p1_w1_d1_t1", time: "9am-12pm", label: "SQL - Advanced Functions", details: "Focus on Window Functions. Complete 5 problems. Learn from <strong>Mode's SQL Tutorial</strong> & Practice on <strong>LeetCode</strong>." },
+                        { id: "p1_w1_d1_t2", time: "1pm-3pm", label: "Resume & Portfolio Review", details: "Rewrite project descriptions for business value. Quantify results. Use guides from <strong>Coursera Articles</strong>." },
+                        { id: "p1_w1_d1_t3", time: "3pm-5pm", label: "LinkedIn Optimization", details: "Rewrite 'About' section to tell a story. Add a 'Featured' section. Use guides from the <strong>LinkedIn Business Blog</strong>." }
+                    ],
+                    "Tuesday": [
+                        { id: "p1_w1_d2_t1", time: "9am-12pm", label: "SQL - CTEs & Subqueries", details: "Master Common Table Expressions. Solve 5 problems comparing CTEs vs. Subqueries. Learn from <strong>Mode's SQL Tutorial</strong>." },
+                        { id: "p1_w1_d2_t2", time: "1pm-3pm", label: "Job Description Analysis", details: "Find 15 roles in Singapore on <strong>LinkedIn</strong> and <strong>MyCareersFuture</strong>. Spreadsheet the top 10 required skills." },
+                        { id: "p1_w1_d2_t3", time: "3pm-5pm", label: "Project Storytelling", details: "Write a 1-page brief for your project: Business Problem, Data, Methodology, Impact. Use the <strong>freeCodeCamp</strong> storytelling guide." }
+                    ],
+                    "Wednesday": [
+                        { id: "p1_w1_d3_t1", time: "9am-12pm", label: "SQL - Joins & Unions", details: "Master self-joins, multiple JOINs, and UNION vs UNION ALL. Review on <strong>W3Schools</strong>." },
+                        { id: "p1_w1_d3_t2", time: "1pm-3pm", label: "Portfolio Enhancement", details: "Embed Plotly dashboards in your portfolio. Research hosting Dash apps using the official <strong>Dash Deployment Docs</strong>." },
+                        { id: "p1_w1_d3_t3", time: "3pm-5pm", label: "GitHub Cleanup", details: "Add clear README.md files to each project repository. Use the <strong>makeareadme.com</strong> generator." }
+                    ],
+                    "Thursday": [
+                        { id: "p1_w1_d4_t1", time: "9am-12pm", label: "SQL - Case Statements & Pivoting", details: "Learn to use CASE for conditional logic and pivoting. Solve 5 related problems. Use the <strong>learnsql.com</strong> guide." },
+                        { id: "p1_w1_d4_t2", time: "1pm-3pm", label: "Industry Research", details: "Pick an industry (e.g., FinTech). Find 3 major companies in Singapore. What data problems could you solve for them?" },
+                        { id: "p1_w1_d4_t3", time: "3pm-5pm", label: "Python - Pandas Review", details: "Review groupby, merge, pivot_table. Work through the <strong>Kaggle Pandas Course</strong>." }
+                    ],
+                    "Friday": [
+                        { id: "p1_w1_d5_t1", time: "9am-12pm", label: "SQL - Week Review Challenge", details: "Take a 'Hard' level SQL test on <strong>HackerRank</strong> or <strong>Stratascratch</strong>." },
+                        { id: "p1_w1_d5_t2", time: "1pm-3pm", label: "Mini-Project Brainstorm", details: "Find a dataset on <strong>Kaggle Datasets</strong> to build a small project around a skill gap (e.g., A/B Testing)." },
+                        { id: "p1_w1_d5_t3", time: "3pm-5pm", label: "Planning & Review", details: "Review your week. What was most challenging? Plan your focus for Week 2." }
+                    ],
+                    "Weekend": [
+                        { id: "p1_w1_d6_t1", time: "Focus", label: "Catch up & Deploy", details: "Rest, catch up, and deploy at least one Plotly dashboard online." }
+                    ]
+                },
+                "Week 2: Python for Analysis & Mini-Project": {
+                    "Monday": [
+                        { id: "p1_w2_d1_t1", time: "9am-12pm", label: "Python - Advanced Pandas", details: "Learn .pipe(), .apply() with lambda, and time-series handling. Learn from <strong>Real Python</strong>." },
+                        { id: "p1_w2_d1_t2", time: "1pm-3pm", label: "Mini-Project: Data Cleaning", details: "Start your mini-project. Perform thorough data cleaning and document every step. Use the <strong>Kaggle Data Cleaning Course</strong>." },
+                        { id: "p1_w2_d1_t3", time: "3pm-5pm", label: "Business Acumen", details: "Read about the CRISP-DM methodology. Learn from <strong>DataScience-PM.com</strong>." }
+                    ],
+                    "Tuesday": [
+                        { id: "p1_w2_d2_t1", time: "9am-12pm", label: "Python - Data Visualization", details: "Master statistical plots and interactive visuals. Use the official <strong>Seaborn</strong> & <strong>Plotly</strong> tutorials." },
+                        { id: "p1_w2_d2_t2", time: "1pm-3pm", label: "Mini-Project: EDA", details: "Perform EDA. Generate 5+ meaningful visualizations and summarize initial findings. Use the <strong>Kaggle EDA Course</strong>." },
+                        { id: "p1_w2_d2_t3", time: "3pm-5pm", label: "SQL Practice", details: "Don't lose your SQL skills. Complete 2 medium SQL problems on <strong>LeetCode</strong>." }
+                    ],
+                    "Wednesday": [
+                        { id: "p1_w2_d3_t1", time: "9am-12pm", label: "Python - Stats with SciPy", details: "Learn to perform t-tests, ANOVA, and Chi-Square tests. Use the official <strong>SciPy Stats Docs</strong>." },
+                        { id: "p1_w2_d3_t2", time: "1pm-3pm", label: "Mini-Project: Hypothesis Testing", details: "Formulate and test 3 hypotheses about your dataset using appropriate statistical methods." },
+                        { id: "p1_w2_d3_t3", time: "3pm-5pm", label: "Project Storytelling", details: "Practice explaining your new mini-project to a non-technical person in 3 minutes. Record yourself." }
+                    ],
+                    "Thursday": [
+                        { id: "p1_w2_d4_t1", time: "9am-12pm", label: "Tableau Fundamentals", details: "Deepen your Tableau skills. Connect to your mini-project data. Use <strong>Tableau Free Training</strong>." },
+                        { id: "p1_w2_d4_t2", time: "1pm-3pm", label: "Mini-Project: Dashboarding", details: "Build an interactive Tableau dashboard to communicate your findings." },
+                        { id: "p1_w2_d4_t3", time: "3pm-5pm", label: "SQL Practice", details: "Complete 2 medium SQL problems, focus on date-time functions. Learn from <strong>SQLTutorial.org</strong>." }
+                    ],
+                    "Friday": [
+                        { id: "p1_w2_d5_t1", time: "9am-12pm", label: "Mini-Project: Finalize & Document", details: "Finalize notebook and dashboard. Write a comprehensive README.md and push to a new GitHub repo." },
+                        { id: "p1_w2_d5_t2", time: "1pm-3pm", label: "Portfolio Update", details: "Add your new mini-project to your portfolio website. Focus on the skill you developed." },
+                        { id: "p1_w2_d5_t3", time: "3pm-5pm", label: "Week Review & Planning", details: "Review progress. How comfortable are you now with Python for analysis? Prepare for next week." }
+                    ],
+                    "Weekend": [
+                        { id: "p1_w2_d6_t1", time: "Focus", label: "Polish and Share", details: "Polish your mini-project. Share your Tableau dashboard on LinkedIn with a write-up." }
+                    ]
+                },
+                "Week 3: Advanced Visualization & Statistics": {
+                    "Monday": [
+                        { id: "p1_w3_d1_t1", time: "9am-12pm", label: "Advanced Tableau - LOD Expressions", details: "Master Level of Detail expressions (FIXED, INCLUDE, EXCLUDE). Learn from the <strong>Tableau Blog</strong>." },
+                        { id: "p1_w3_d1_t2", time: "1pm-3pm", label: "Statistics - A/B Testing Theory", details: "Deep dive into A/B testing theory: hypothesis, p-values, confidence intervals. Learn from <strong>Optimizely</strong>." },
+                        { id: "p1_w3_d1_t3", time: "3pm-5pm", label: "SQL & Python Practice", details: "Stay sharp. 2 hard SQL problems and 1 Python challenge." }
+                    ],
+                    "Tuesday": [
+                        { id: "p1_w3_d2_t1", time: "9am-12pm", label: "Advanced Tableau - Interactivity", details: "Use parameters and sets to create highly interactive dashboards. Learn from <strong>Tableau Help</strong>." },
+                        { id: "p1_w3_d2_t2", time: "1pm-3pm", label: "Statistics - A/B Testing in Python", details: "Find an A/B test dataset on Kaggle. Perform end-to-end analysis in a Jupyter Notebook. See examples on <strong>Kaggle</strong>." },
+                        { id: "p1_w3_d2_t3", time: "3pm-5pm", label: "Project Storytelling", details: "Create a 3-slide presentation for your HDB price prediction project: Problem, Process, Results." }
+                    ],
+                    "Wednesday": [
+                        { id: "p1_w3_d3_t1", time: "9am-12pm", label: "Advanced Tableau - Mapping", details: "Create advanced maps. Learn spatial joins and custom territories. Use the <strong>Tableau Mapping Guide</strong>." },
+                        { id: "p1_w3_d3_t2", time: "1pm-3pm", label: "Product Metrics & KPIs", details: "Research key e-commerce metrics (Conversion Rate, AOV, LTV). How to calculate with SQL? Learn from the <strong>Shopify Blog</strong>." },
+                        { id: "p1_w3_d3_t3", time: "3pm-5pm", label: "Portfolio & GitHub Review", details: "Get feedback on your portfolio/GitHub from a peer or mentor. Is it easy to navigate?" }
+                    ],
+                    "Thursday": [
+                        { id: "p1_w3_d4_t1", time: "9am-12pm", label: "Tableau Storytelling", details: "Build a 'Story' in Tableau to create a narrative from your A/B test analysis. Learn from <strong>Tableau Help</strong>." },
+                        { id: "p1_w3_d4_t2", time: "1pm-3pm", label: "Statistics - Common Pitfalls", details: "Research A/B testing mistakes (peeking, Simpson's paradox). Write a short post. Learn from the <strong>VWO Blog</strong>." },
+                        { id: "p1_w3_d4_t3", time: "3pm-5pm", label: "SQL & Python Practice", details: "Focus on analytics case study questions on <strong>Stratascratch</strong>." }
+                    ],
+                    "Friday": [
+                        { id: "p1_w3_d5_t1", time: "9am-12pm", label: "Weekly Challenge", details: "Find and complete a 'Workout Wednesday' Tableau challenge from <strong>Workout Wednesday</strong>." },
+                        { id: "p1_w3_d5_t2", time: "1pm-3pm", label: "'Master' Resume Prep", details: "Create a master resume document with all experiences and detailed bullet points." },
+                        { id: "p1_w3_d5_t3", time: "3pm-5pm", label: "Week Review & Planning", details: "What are your strongest skills? What needs work? Plan for the final prep week." }
+                    ],
+                    "Weekend": [
+                        { id: "p1_w3_d6_t1", time: "Focus", label: "Rest & Read", details: "Rest. Read a book or listen to a podcast on data storytelling or business strategy." }
+                    ]
+                },
+                "Week 4: Business Acumen & Final Prep": {
+                    "Monday": [
+                        { id: "p1_w4_d1_t1", time: "9am-12pm", label: "Cloud Fundamentals - AWS/GCP", details: "Create a free tier account. Learn to upload a CSV to AWS S3. Use the <strong>AWS S3 Intro Guide</strong>." },
+                        { id: "p1_w4_d1_t2", time: "1pm-3pm", label: "Cloud Databases - BigQuery/Redshift", details: "Load your mini-project dataset into BigQuery and run SQL queries. Use the <strong>Google Cloud BigQuery Quickstart</strong>." },
+                        { id: "p1_w4_d1_t3", time: "3pm-5pm", label: "Excel for Data Analysts", details: "Practice XLOOKUP, PivotTables, and Power Query. Use the <strong>Microsoft Power Query Intro</strong>." }
+                    ],
+                    "Tuesday": [
+                        { id: "p1_w4_d2_t1", time: "9am-12pm", label: "Git & Version Control", details: "Learn about branching, merging, and pull requests. Create and merge a new branch. Use the <strong>Atlassian Git Branching Tutorial</strong>." },
+                        { id: "p1_w4_d2_t2", time: "1pm-3pm", label: "Application Strategy", details: "List 20 target companies. Research their industries, missions, and data leaders on LinkedIn." },
+                        { id: "p1_w4_d2_t3", time: "3pm-5pm", label: "'Master' Cover Letter Prep", details: "Write a compelling, modular cover letter template you can easily customize." }
+                    ],
+                    "Wednesday": [
+                        { id: "p1_w4_d3_t1", time: "9am-12pm", label: "Business Case Study Practice", details: "Find case studies online. Write a structured approach: Problem -> Hypotheses -> Data -> Analysis -> Recs. Find examples on <strong>Stratascratch</strong>." },
+                        { id: "p1_w4_d3_t2", time: "1pm-3pm", label: "Behavioral Question Prep (STAR)", details: "Write 5 detailed stories using the STAR method (Situation, Task, Action, Result). Use <strong>The Muse's STAR Method Guide</strong>." },
+                        { id: "p1_w4_d3_t3", time: "3pm-5pm", label: "Elevator Pitch", details: "Craft and memorize a 30-second and 2-minute 'Tell me about yourself' answer. Record yourself." }
+                    ],
+                    "Thursday": [
+                        { id: "p1_w4_d4_t1", time: "9am-12pm", label: "Full Project Walkthrough", details: "Practice explaining your most complex project end-to-end. Time yourself for a clear 10-minute explanation." },
+                        { id: "p1_w4_d4_t2", time: "1pm-3pm", label: "Mock Interview - Peer", details: "Do a 1-hour mock interview with a friend (half behavioral, half technical). Give and receive feedback." },
+                        { id: "p1_w4_d4_t3", time: "3pm-5pm", label: "LinkedIn Outreach Prep", details: "Draft templates for connection requests and informational interview requests. Personalize them." }
+                    ],
+                    "Friday": [
+                        { id: "p1_w4_d5_t1", time: "9am-12pm", label: "Final Portfolio Review", details: "Final check of your portfolio, GitHub, LinkedIn for typos, broken links. Ask someone non-technical to review it." },
+                        { id: "p1_w4_d5_t2", time: "1pm-3pm", label: "Set Up Application Tracker", details: "Create a spreadsheet (or use Trello) to track applications: Company, Role, Date, Link, Status, Notes." },
+                        { id: "p1_w4_d5_t3", time: "3pm-5pm", label: "Week/Phase 1 Review", details: "Review the last 4 weeks. You are now ready to apply. Celebrate this milestone." }
+                    ],
+                    "Weekend": [
+                        { id: "p1_w4_d6_t1", time: "Focus", label: "Rest & Recharge", details: "Rest and recharge. The offensive begins Monday." }
+                    ]
+                }
+            },
+            "Phase 2: The Application & Networking Offensive (Weeks 5-8)": {
+                "Week 5: Launch Week": {
+                    "Monday": [
+                        { id: "p2_w5_d1_t1", time: "9am-11am", label: "Targeted Applications", details: "Apply to 5-7 jobs from your target list. Tailor your resume and cover letter for each." },
+                        { id: "p2_w5_d1_t2", time: "11am-1pm", label: "LinkedIn Networking", details: "Send 5-10 personalized connection requests to recruiters/analysts at those companies." },
+                        { id: "p2_w5_d1_t3", time: "2pm-4pm", label: "SQL & Python Practice", details: "Stay sharp. 2 medium SQL and 1 Python coding challenge." },
+                        { id: "p2_w5_d1_t4", time: "4pm-5pm", label: "Application Tracking", details: "Diligently update your tracking spreadsheet." }
+                    ],
+                    "Tuesday": [
+                        { id: "p2_w5_d2_t1", time: "9am-11am", label: "'Easy Apply' & Volume", details: "Apply to 10-15 roles using LinkedIn's 'Easy Apply' to maintain momentum." },
+                        { id: "p2_w5_d2_t2", time: "11am-1pm", label: "Engage on LinkedIn", details: "Leave thoughtful comments on posts by people or companies in your target network." },
+                        { id: "p2_w5_d2_t3", time: "2pm-4pm", label: "Behavioral Prep", details: "Refine your STAR stories. Practice telling them out loud." },
+                        { id: "p2_w5_d2_t4", time: "4pm-5pm", label: "Application Tracking", details: "Update your spreadsheet." }
+                    ],
+                    "Wed-Fri": [
+                        { id: "p2_w5_d3_t1", time: "Repeat", label: "Repeat Mon/Tue Schedule", details: "Aim for 25-30 quality applications and 20-30 new, relevant connections by the end of the week." }
+                    ],
+                    "Weekend": [
+                        { id: "p2_w5_d4_t1", time: "Focus", label: "Follow-up & Rest", details: "Follow up on interesting leads. Light practice. Rest." }
+                    ]
+                },
+                "Week 6: Building Momentum": {
+                    "Monday": [
+                        { id: "p2_w6_d1_t1", time: "9am-11am", label: "Application & Follow-up", details: "Apply to 5-7 new roles. Follow up on 3 applications from last week via polite email or LinkedIn message." },
+                        { id: "p2_w6_d1_t2", time: "11am-1pm", label: "Informational Interviews", details: "Send out 5 requests for a 15-minute virtual coffee chat to learn about a role or company." },
+                        { id: "p2_w6_d1_t3", time: "2pm-4pm", label: "Technical Practice", details: "2 Hard SQL problems. 1 Python stats problem." },
+                        { id: "p2_w6_d1_t4", time: "4pm-5pm", label: "Tracking", details: "Update tracker." }
+                    ],
+                    "Tuesday": [
+                        { id: "p2_w6_d2_t1", time: "9am-11am", label: "Recruiter Focus", details: "Search for 'Technical Recruiter' at your target companies on LinkedIn and connect with them." },
+                        { id: "p2_w6_d2_t2", time: "11am-1pm", label: "Conduct Informational Chat", details: "Be prepared with smart questions about their work, company culture, and tools." },
+                        { id: "p2_w6_d2_t3", time: "2pm-4pm", label: "Case Study Practice", details: "Work through another business case study. Create a mock presentation of your findings." },
+                        { id: "p2_w6_d2_t4", time: "4pm-5pm", label: "Tracking", details: "Update tracker." }
+                    ],
+                    "Wed-Fri": [
+                        { id: "p2_w6_d3_t1", time: "Repeat", label: "Repeat & Refine", details: "Continue the cycle. If you get recruiter calls, a new task is 'Recruiter Screen Prep'. Research the company before every call." }
+                    ],
+                    "Weekend": [
+                        { id: "p2_w6_d4_t1", time: "Focus", label: "Prep or Personal Project", details: "If you have a screening next week, spend 2-3 hours preparing. Otherwise, focus on a fun personal data project." }
+                    ]
+                },
+                "Weeks 7-8: The Grind & First Interviews": {
+                    "Daily Rhythm": [
+                        { id: "p2_w78_d1_t1", time: "Daily", label: "Maintain Application/Networking/Practice", details: "Continue the core schedule of applying, networking, and practicing technical skills." }
+                    ],
+                    "New Focus": [
+                        { id: "p2_w78_d2_t1", time: "As Needed", label: "Company-Specific Interview Prep", details: "For each interview, create a 1-page doc: Company Mission, Products, Recent News, Role-Specific Questions." },
+                        { id: "p2_w78_d2_t2", time: "Weekly", label: "Mock Interviews", details: "Aim for at least one mock interview per week with someone who will give you honest feedback." },
+                        { id: "p2_w78_d2_t3", time: "As Needed", label: "Handling Rejection", details: "Send a polite thank you note. Ask for feedback if comfortable. Update your tracker and move on." }
+                    ]
+                }
+            },
+            "Phase 3: Closing the Deal (Weeks 9-12)": {
+                "Week 9: Technical & Take-Home Challenges": {
+                    "Monday": [
+                        { id: "p3_w9_d1_t1", time: "9am-12pm", label: "Mock Technical Screen", details: "Have a friend give you a timed, live SQL & Python screen. Use a tool like <strong>CoderPad</strong>." },
+                        { id: "p3_w9_d1_t2", time: "1pm-4pm", label: "Take-Home Challenge Practice", details: "Find data analyst take-home assignments online. Complete one under timed conditions. Use guides from <strong>Interview Query</strong>." },
+                        { id: "p3_w9_d1_t3", time: "4pm-5pm", label: "Application Maintenance", details: "Apply to 3-5 roles to keep the pipeline warm." }
+                    ],
+                    "Tuesday": [
+                        { id: "p3_w9_d2_t1", time: "9am-12pm", label: "Deep Dive: Specific Company", details: "If you have a technical interview, research their product. Formulate hypotheses about their data." },
+                        { id: "p3_w9_d2_t2", time: "1pm-4pm", label: "Project Presentation Practice", details: "Present one of your portfolio projects as if in a final-round interview. Record yourself." },
+                        { id: "p3_w9_d2_t3", time: "4pm-5pm", label: "Follow-ups", details: "Send thank-you notes for any interviews from the previous week." }
+                    ],
+                    "Wed-Fri": [
+                        { id: "p3_w9_d3_t1", time: "Repeat", label: "Focused Preparation", details: "Continue deep preparation for any scheduled interviews. If none, work on a complex portfolio project that fills a skill gap." }
+                    ],
+                    "Weekend": [
+                        { id: "p3_w9_d4_t1", time: "Focus", label: "Prepare & Rest", details: "Prepare for any interviews next week. Rest is crucial." }
+                    ]
+                },
+                "Weeks 10-11: Final Rounds": {
+                    "Structure": [
+                        { id: "p3_w1011_d1_t1", time: "Focus", label: "Mock 'On-Site'", details: "Ask 3 friends to give you three 45-min mock interviews back-to-back (Behavioral, Technical, Case Study)." },
+                        { id: "p3_w1011_d1_t2", time: "Focus", label: "Question Prep", details: "Prepare 5 insightful questions for them (e.g., 'What's the biggest challenge your team is facing?')." },
+                        { id: "p3_w1011_d1_t3", time: "Focus", label: "'Meet the Team' Prep", details: "Be prepared to talk about your hobbies and interests. Be authentic and curious." }
+                    ]
+                },
+                "Week 12: The Offer": {
+                    "Process": [
+                        { id: "p3_w12_d1_t1", time: "Patience", label: "Patience & Persistence", details: "After a final round, it can take a week to hear back. Keep applying to other roles." },
+                        { id: "p3_w12_d1_t2", time: "Negotiation", label: "Receiving & Negotiating an Offer", details: "Thank them, ask for details in writing, and take 2-3 days to review. Research salary benchmarks on <strong>Glassdoor</strong> and <strong>Levels.fyi</strong>." },
+                        { id: "p3_w12_d1_t3", time: "Decision", label: "Decision & Celebration", details: "Make your decision. Inform all companies of your choice. Never ghost a recruiter. Then, celebrate!" }
+                    ]
+                }
+            }
+        };
+
+
+        // --- UI & DOM ELEMENTS ---
+        const planContainer = document.getElementById('plan-container');
+        const overallProgressBar = document.getElementById('overall-progress-bar');
+        const overallProgressText = document.getElementById('overall-progress-text');
+        const resetButton = document.getElementById('reset-button');
+        const resetModal = document.getElementById('reset-modal');
+        const cancelReset = document.getElementById('cancel-reset');
+        const confirmReset = document.getElementById('confirm-reset');
+        const userInfoDiv = document.getElementById('user-info');
+        const navContainer = document.querySelector('nav');
+
+        // Gemini Modal Elements
+        const geminiModal = document.getElementById('gemini-modal');
+        const closeGeminiModalBtn = document.getElementById('close-gemini-modal');
+        const geminiLoading = document.getElementById('gemini-loading');
+        const geminiResponseEl = document.getElementById('gemini-response');
+
+        let db, auth, userId, isAuthReady = false;
+        let taskStates = {};
+
+        // --- FIREBASE SETUP ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
+            authDomain: "my-data-plan-tracker.firebaseapp.com",
+            projectId: "my-data-plan-tracker",
+            storageBucket: "my-data-plan-tracker.firebasestorage.app",
+            messagingSenderId: "63645797673",
+            appId: "1:63645797673:web:a53c4adbcdf4225981bb38"
+        };
+        const appId = 'my-data-plan-tracker'; // Use your projectId here
+        const DOC_NAME = 'data-analyst-plan-12-week-v8'; // New version for multi-page layout
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            setLogLevel('debug');
+        } catch (e) {
+            console.error("Firebase initialization failed:", e);
+            userInfoDiv.innerHTML = `<p class="text-red-400">Error: Could not connect to the database.</p>`;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                isAuthReady = true;
+                userInfoDiv.innerHTML = `<p>UserID: ${userId}</p><p>Status: Connected</p>`;
+                await loadAndListenForTasks();
+            } else {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                    userInfoDiv.innerHTML = `<p class="text-red-400">Authentication failed. Your progress cannot be saved.</p>`;
+                }
+            }
+        });
+
+        // --- DATA HANDLING ---
+        function getInitialTaskStates() {
+            const initialState = {};
+            Object.values(planData).forEach(phase => {
+                Object.values(phase).forEach(week => {
+                    Object.values(week).forEach(day => {
+                        day.forEach(task => {
+                            initialState[task.id] = false;
+                        });
+                    });
+                });
+            });
+            return initialState;
+        }
+
+        async function loadAndListenForTasks() {
+            if (!isAuthReady || !userId) return;
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
+
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    taskStates = docSnap.data().tasks || {};
+                } else {
+                    console.log("No such document! Initializing...");
+                    taskStates = getInitialTaskStates();
+                    setDoc(docRef, { tasks: taskStates }).catch(e => console.error("Error initializing document:", e));
+                }
+                renderPlan();
+                updateAllUI();
+                // Show the initial phase after data is loaded
+                const lastPhase = localStorage.getItem('lastActivePhase') || '1';
+                showPhase(lastPhase);
+            }, (error) => {
+                console.error("Error with onSnapshot:", error);
+                userInfoDiv.innerHTML += `<p class="text-red-400">Error listening for real-time updates.</p>`;
+            });
+        }
+
+        async function updateTaskState(taskId, isCompleted) {
+            if (!isAuthReady || !userId) return;
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
+            try {
+                await updateDoc(docRef, { [`tasks.${taskId}`]: isCompleted });
+            } catch (error) {
+                console.error("Error updating task:", error);
+                const initialStates = getInitialTaskStates();
+                initialStates[taskId] = isCompleted;
+                await setDoc(docRef, { tasks: initialStates });
+            }
+        }
+
+        async function resetAllProgress() {
+            if (!isAuthReady || !userId) return;
+            const initialStates = getInitialTaskStates();
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
+            try {
+                await setDoc(docRef, { tasks: initialStates });
+                console.log("Progress reset successfully.");
+            } catch (error) {
+                console.error("Error resetting progress:", error);
+            }
+        }
+
+        // --- UI RENDERING & PAGE LOGIC ---
+        function renderPlan() {
+            planContainer.innerHTML = ''; // Clear previous content
+            Object.entries(planData).forEach(([phaseTitle, weeks], phaseIndex) => {
+                const phaseNum = phaseIndex + 1;
+                const phaseContainer = document.createElement('div');
+                phaseContainer.id = `phase-${phaseNum}-content`;
+                phaseContainer.className = 'phase-content space-y-12 hidden'; // Initially hidden
+
+                phaseContainer.innerHTML = `<h2 class="text-3xl font-bold text-cyan-300 mb-6 border-l-4 border-cyan-400 pl-4">${phaseTitle}</h2>`;
+
+                const weeksGrid = document.createElement('div');
+                weeksGrid.className = 'grid grid-cols-1 xl:grid-cols-2 gap-8';
+
+                Object.entries(weeks).forEach(([weekTitle, days]) => {
+                    const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    const weekCard = document.createElement('div');
+                    weekCard.className = 'bg-gray-800 rounded-2xl p-6 shadow-2xl flex flex-col border border-gray-700';
+
+                    let daysHtml = Object.entries(days).map(([dayTitle, tasks]) => {
+                        let tasksHtml = tasks.map(task => `
+                            <li class="flex items-start space-x-4 py-3">
+                                <input id="${task.id}" type="checkbox" class="h-5 w-5 rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-600 cursor-pointer mt-1 flex-shrink-0">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <label for="${task.id}" class="font-semibold text-gray-100 cursor-pointer pr-2">${task.label}</label>
+                                        <div class="flex items-center flex-shrink-0">
+                                            <span class="text-xs text-gray-400 mr-2">${task.time}</span>
+                                            <button class="gemini-btn text-lg text-cyan-400 hover:text-cyan-200 leading-none" data-task-label="${task.label}" data-task-details="${task.details.replace(/"/g, '&quot;')}" title="✨ Get AI Help">✨</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mt-1 details">${task.details}</p>
+                                </div>
+                            </li>
+                        `).join('');
+
+                        return `
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-300 mt-4 mb-2 border-b border-gray-700 pb-1">${dayTitle}</h4>
+                                <ul class="divide-y divide-gray-700/50">
+                                    ${tasksHtml}
+                                </ul>
+                            </div>
+                        `;
+                    }).join('');
+
+                    weekCard.innerHTML = `
+                        <h3 class="text-xl font-bold text-cyan-300 mb-2">${weekTitle}</h3>
+                        <div class="mb-4">
+                            <div class="bg-gray-700 rounded-full h-2.5">
+                                <div id="progress-bar-${weekId}" class="bg-cyan-400 h-2.5 rounded-full progress-bar-inner"></div>
+                            </div>
+                            <p id="progress-text-${weekId}" class="text-center text-xs mt-1 text-gray-400"></p>
+                        </div>
+                        <div class="space-y-4 flex-grow overflow-y-auto" style="max-height: 600px;">
+                           ${daysHtml}
+                        </div>
+                    `;
+                    weeksGrid.appendChild(weekCard);
+                });
+                phaseContainer.appendChild(weeksGrid);
+                planContainer.appendChild(phaseContainer);
+            });
+        }
+
+        function showPhase(phaseNum) {
+            // Hide all phase content
+            document.querySelectorAll('.phase-content').forEach(el => el.classList.add('hidden'));
+            // Show the selected one
+            const activePhaseContent = document.getElementById(`phase-${phaseNum}-content`);
+            if (activePhaseContent) {
+                activePhaseContent.classList.remove('hidden');
+            }
+
+            // Update nav button styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.phase === phaseNum) {
+                    btn.classList.add('active');
+                }
+            });
+            // Save the last viewed phase
+            localStorage.setItem('lastActivePhase', phaseNum);
+        }
+
+        function updateAllUI() {
+            for (const taskId in taskStates) {
+                const checkbox = document.getElementById(taskId);
+                if (checkbox) {
+                    checkbox.checked = !!taskStates[taskId];
+                }
+            }
+            updateProgressBars();
+        }
+
+        function updateProgressBars() {
+            let totalTasks = 0;
+            let totalCompleted = 0;
+
+            Object.values(planData).forEach(phase => {
+                Object.entries(phase).forEach(([weekTitle, weekData]) => {
+                    const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    let weekTasks = 0;
+                    let weekCompleted = 0;
+
+                    Object.values(weekData).forEach(day => {
+                        day.forEach(task => {
+                            weekTasks++;
+                            if (taskStates[task.id]) {
+                                weekCompleted++;
+                            }
+                        });
+                    });
+
+                    totalTasks += weekTasks;
+                    totalCompleted += weekCompleted;
+
+                    const percentage = weekTasks > 0 ? (weekCompleted / weekTasks) * 100 : 0;
+                    const progressBar = document.getElementById(`progress-bar-${weekId}`);
+                    const progressText = document.getElementById(`progress-text-${weekId}`);
+
+                    if (progressBar) progressBar.style.width = `${percentage}%`;
+                    if (progressText) progressText.textContent = `${weekCompleted} / ${weekTasks} tasks completed`;
+                });
+            });
+
+            const overallPercentage = totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0;
+            if (overallProgressBar) overallProgressBar.style.width = `${overallPercentage}%`;
+            if (overallProgressText) overallProgressText.textContent = `Total Progress: ${totalCompleted} of ${totalTasks} tasks completed (${overallPercentage.toFixed(1)}%)`;
+        }
+
+        // --- GEMINI API & MODAL LOGIC ---
+        function simpleMarkdownToHtml(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/(\r\n|\n|\r)/gm, "\n") // Standardize line breaks
+                .split('\n')
+                .map(line => {
+                    if (line.startsWith('#### ')) return `<h4>${line.substring(5)}</h4>`;
+                    if (line.startsWith('### ')) return `<h3>${line.substring(4)}</h3>`;
+                    if (line.startsWith('## ')) return `<h2>${line.substring(3)}</h2>`;
+                    if (line.startsWith('* ')) return `<li>${line.substring(2)}</li>`;
+                    if (line.trim() === '') return '<br>';
+                    return `<p>${line}</p>`;
+                })
+                .join('')
+                .replace(/<\/ul\>\s*?<ul>/g, ''); // Join adjacent lists
+        }
+
+
+        async function getAiHelp(taskLabel, taskDetails) {
+            geminiResponseEl.innerHTML = '';
+            geminiLoading.classList.remove('hidden');
+
+            let prompt;
+            const lowerCaseLabel = taskLabel.toLowerCase();
+
+            if (lowerCaseLabel.includes('project') || lowerCaseLabel.includes('brainstorm') || lowerCaseLabel.includes('challenge')) {
+                prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan and needs to start a portfolio project or challenge. Break down the following task into smaller, manageable steps. Suggest the types of datasets they should look for (if applicable) and what key sections to include in their final analysis or report. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
+            } else if (lowerCaseLabel.includes('behavioral') || lowerCaseLabel.includes('pitch')) {
+                prompt = `You are an expert career coach for data analysts. A student is preparing for interviews and needs help with behavioral questions. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Explain how to approach this task effectively, focusing on the STAR method (Situation, Task, Action, Result). Provide a clear, concrete example of a STAR method response related to a data analysis project or task. Format your response using simple Markdown with headers and bullet points.`;
+            } else {
+                prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan. Explain the following task to them clearly and concisely. Focus on **why** this task is important for a data analyst and provide **actionable first steps**. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
+            }
+
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // API key is handled by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                let text = 'No response found.';
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                    text = result.candidates[0].content.parts[0].text;
+                }
+                geminiResponseEl.innerHTML = simpleMarkdownToHtml(text);
+
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                geminiResponseEl.innerHTML = '<p class="text-red-400">Sorry, there was an error getting help from the AI assistant. Please check the console for details.</p>';
+            } finally {
+                geminiLoading.classList.add('hidden');
+            }
+        }
+
+        // --- EVENT HANDLERS ---
+        // Using a single listener on the app container for efficiency
+        document.getElementById('app').addEventListener('click', (event) => {
+            const geminiButton = event.target.closest('.gemini-btn');
+            if (geminiButton) {
+                const taskLabel = geminiButton.dataset.taskLabel;
+                const taskDetails = geminiButton.dataset.taskDetails;
+                geminiModal.classList.remove('hidden');
+                getAiHelp(taskLabel, taskDetails);
+            }
+        });
+
+        document.getElementById('app').addEventListener('change', (event) => {
+            if (event.target.type === 'checkbox') {
+                const taskId = event.target.id;
+                const isCompleted = event.target.checked;
+                taskStates[taskId] = isCompleted;
+                updateTaskState(taskId, isCompleted);
+                updateProgressBars();
+            }
+        });
+
+        navContainer.addEventListener('click', (event) => {
+            const navButton = event.target.closest('.nav-btn');
+            if (navButton) {
+                showPhase(navButton.dataset.phase);
+            }
+        });
+
+        resetButton.addEventListener('click', () => resetModal.classList.remove('hidden'));
+        cancelReset.addEventListener('click', () => resetModal.classList.add('hidden'));
+        confirmReset.addEventListener('click', () => {
+            resetAllProgress();
+            resetModal.classList.add('hidden');
+        });
+
+        closeGeminiModalBtn.addEventListener('click', () => geminiModal.classList.add('hidden'));
+        geminiModal.addEventListener('click', (event) => {
+            if (event.target === geminiModal) {
+                geminiModal.classList.add('hidden');
+            }
+        });
+
+    </script>
+</body>
+
+</html>
