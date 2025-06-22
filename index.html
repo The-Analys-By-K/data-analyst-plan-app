@@ -359,377 +359,312 @@
         };
 
 
-        // --- UI & DOM ELEMENTS ---
-        const planContainer = document.getElementById('plan-container');
-        const overallProgressBar = document.getElementById('overall-progress-bar');
-        const overallProgressText = document.getElementById('overall-progress-text');
-        const resetButton = document.getElementById('reset-button');
-        const resetModal = document.getElementById('reset-modal');
-        const cancelReset = document.getElementById('cancel-reset');
-        const confirmReset = document.getElementById('confirm-reset');
-        const userInfoDiv = document.getElementById('user-info');
-        const navContainer = document.querySelector('nav');
-        
-        // Gemini Modal Elements
-        const geminiModal = document.getElementById('gemini-modal');
-        const closeGeminiModalBtn = document.getElementById('close-gemini-modal');
-        const geminiLoading = document.getElementById('gemini-loading');
-        const geminiResponseEl = document.getElementById('gemini-response');
-        
-        let db, auth, userId, isAuthReady = false;
-        let taskStates = {};
+        // --- UI & DOM ELEMENTS ---
+        const planContainer = document.getElementById('plan-container');
+        const overallProgressBar = document.getElementById('overall-progress-bar');
+        const overallProgressText = document.getElementById('overall-progress-text');
+        const resetButton = document.getElementById('reset-button');
+        const resetModal = document.getElementById('reset-modal');
+        const cancelReset = document.getElementById('cancel-reset');
+        const confirmReset = document.getElementById('confirm-reset');
+        const userInfoDiv = document.getElementById('user-info');
+        const navContainer = document.querySelector('nav');
+        
+        // Gemini Modal Elements
+        const geminiModal = document.getElementById('gemini-modal');
+        const closeGeminiModalBtn = document.getElementById('close-gemini-modal');
+        const geminiLoading = document.getElementById('gemini-loading');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        
+        let db, auth, userId, isAuthReady = false;
+        let taskStates = {};
 
-        // --- FIREBASE SETUP ---
-        // Replace this with your own Firebase project configuration
-        const firebaseConfig = {
-          Key: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
-          authDomain: "my-data-plan-tracker.firebaseapp.com",
-          projectId: "my-data-plan-tracker",
-          storageBucket: "my-data-plan-tracker.appspot.com",
-          messagingSenderId: "63645797673",
-          appId: "1:63645797673:web:a53c4adbcdf4225981bb38"
-        };
-        const appId = firebaseConfig.projectId; // Use projectId for consistency
-        const DOC_NAME = 'data-analyst-plan-12-week-v9-permanent'; // New version
+        // --- FIREBASE SETUP ---
+        // Replace this with your own Firebase project configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
+          authDomain: "my-data-plan-tracker.firebaseapp.com",
+          projectId: "my-data-plan-tracker",
+          storageBucket: "my-data-plan-tracker.appspot.com",
+          messagingSenderId: "63645797673",
+          appId: "1:63645797673:web:a53c4adbcdf4225981bb38"
+        };
+        const appId = firebaseConfig.projectId; // Use projectId for consistency
+        const DOC_NAME = 'data-analyst-plan-12-week-v9-permanent'; // New version
 
-        // --- AUTHENTICATION & INITIALIZATION ---
-        async function initializeAppAndAuth() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug');
+        // --- AUTHENTICATION & INITIALIZATION ---
+        async function initializeAppAndAuth() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
 
-                // Hardcoded credentials for permanent login
-                const email = "user@example.com";
-                const password = "password123";
+                // Hardcoded credentials for permanent login
+                const email = "user@example.com";
+                const password = "password123";
 
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                userId = userCredential.user.uid;
-                isAuthReady = true;
-                userInfoDiv.innerHTML = `<p>User ID: ${userId}</p><p>Status: Logged In Permanently</p>`;
-                await loadAndListenForTasks();
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                userId = userCredential.user.uid;
+                isAuthReady = true;
+                userInfoDiv.innerHTML = `<p>User ID: ${userId}</p><p>Status: Logged In Permanently</p>`;
+                await loadAndListenForTasks();
 
-            } catch (error) {
-                console.error("Permanent login failed:", error);
-                userInfoDiv.innerHTML = `<p class="text-red-400">Login Failed. Please ensure you have created the user (user@example.com / password123) in your Firebase Authentication panel.</p>`;
-            }
-        }
-        
-        // --- DATA HANDLING ---
-        function getInitialTaskStates() {
-            const initialState = {};
-            Object.values(planData).forEach(phase => {
-                Object.values(phase).forEach(week => {
-                    Object.values(week).forEach(day => {
-                        day.forEach(task => {
-                            initialState[task.id] = false;
-                        });
-                    });
-                });
-            });
-            return initialState;
-        }
-        
-        async function loadAndListenForTasks() {
-            if (!isAuthReady || !userId) return;
-            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
-            
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    taskStates = docSnap.data().tasks || {};
-                } else {
-                    console.log("No such document! Initializing...");
-                    taskStates = getInitialTaskStates();
-                    setDoc(docRef, { tasks: taskStates }).catch(e => console.error("Error initializing document:", e));
-                }
-                renderPlan();
-                updateAllUI();
-                 // Show the initial phase after data is loaded
-                const lastPhase = localStorage.getItem('lastActivePhase') || '1';
-                showPhase(lastPhase);
-            }, (error) => {
-                console.error("Error with onSnapshot:", error);
-                userInfoDiv.innerHTML += `<p class="text-red-400">Error listening for real-time updates.</p>`;
-            });
-        }
-        
-        async function updateTaskState(taskId, isCompleted) {
-            if (!isAuthReady || !userId) return;
-            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
-            try {
-                await updateDoc(docRef, { [`tasks.${taskId}`]: isCompleted });
-            } catch (error) {
-                console.error("Error updating task:", error);
-                const initialStates = getInitialTaskStates();
-                initialStates[taskId] = isCompleted;
-                await setDoc(docRef, { tasks: initialStates });
-            }
-        }
+            } catch (error) {
+                console.error("Permanent login failed:", error);
+                userInfoDiv.innerHTML = `<p class="text-red-400">Login Failed. Please ensure you have created the user (user@example.com / password123) in your Firebase Authentication panel.</p>`;
+            }
+        }
+        
+        // --- DATA HANDLING ---
+        function getInitialTaskStates() {
+            const initialState = {};
+            Object.values(planData).forEach(phase => {
+                Object.values(phase).forEach(week => {
+                    Object.values(week).forEach(day => {
+                        day.forEach(task => {
+                            initialState[task.id] = false;
+                        });
+                    });
+                });
+            });
+            return initialState;
+        }
+        
+        async function loadAndListenForTasks() {
+            if (!isAuthReady || !userId) return;
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    taskStates = docSnap.data().tasks || {};
+                } else {
+                    console.log("No such document! Initializing...");
+                    taskStates = getInitialTaskStates();
+                    setDoc(docRef, { tasks: taskStates }).catch(e => console.error("Error initializing document:", e));
+                }
+                renderPlan();
+                updateAllUI();
+                 // Show the initial phase after data is loaded
+                const lastPhase = localStorage.getItem('lastActivePhase') || '1';
+                showPhase(lastPhase);
+            }, (error) => {
+                console.error("Error with onSnapshot:", error);
+                userInfoDiv.innerHTML += `<p class="text-red-400">Error listening for real-time updates.</p>`;
+            });
+        }
+        
+        async function updateTaskState(taskId, isCompleted) {
+            if (!isAuthReady || !userId) return;
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
+            try {
+                await updateDoc(docRef, { [`tasks.${taskId}`]: isCompleted });
+            } catch (error) {
+                console.error("Error updating task:", error);
+                const initialStates = getInitialTaskStates();
+                initialStates[taskId] = isCompleted;
+                await setDoc(docRef, { tasks: initialStates });
+            }
+        }
 
-        async function resetAllProgress() {
-            if (!isAuthReady || !userId) return;
-            const initialStates = getInitialTaskStates();
-            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
-            try {
-                await setDoc(docRef, { tasks: initialStates });
-                console.log("Progress reset successfully.");
-            } catch (error) {
-                console.error("Error resetting progress:", error);
-            }
-        }
+        async function resetAllProgress() {
+            if (!isAuthReady || !userId) return;
+            const initialStates = getInitialTaskStates();
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
+            try {
+                await setDoc(docRef, { tasks: initialStates });
+                console.log("Progress reset successfully.");
+            } catch (error) {
+                console.error("Error resetting progress:", error);
+            }
+        }
 
-        // --- UI RENDERING & PAGE LOGIC ---
-        function renderPlan() {
-            planContainer.innerHTML = ''; // Clear previous content
-            Object.entries(planData).forEach(([phaseTitle, weeks], phaseIndex) => {
-                const phaseNum = phaseIndex + 1;
-                const phaseContainer = document.createElement('div');
-                phaseContainer.id = `phase-${phaseNum}-content`;
-                phaseContainer.className = 'phase-content space-y-12 hidden'; // Initially hidden
-                
-                phaseContainer.innerHTML = `<h2 class="text-3xl font-bold text-cyan-300 mb-6 border-l-4 border-cyan-400 pl-4">${phaseTitle}</h2>`;
-                
-                const weeksGrid = document.createElement('div');
-                weeksGrid.className = 'grid grid-cols-1 xl:grid-cols-2 gap-8';
+        // --- UI RENDERING & PAGE LOGIC ---
+        function renderPlan() {
+            planContainer.innerHTML = ''; // Clear previous content
+            Object.entries(planData).forEach(([phaseTitle, weeks], phaseIndex) => {
+                const phaseNum = phaseIndex + 1;
+                const phaseContainer = document.createElement('div');
+                phaseContainer.id = `phase-${phaseNum}-content`;
+                phaseContainer.className = 'phase-content space-y-12 hidden'; // Initially hidden
+                
+                phaseContainer.innerHTML = `<h2 class="text-3xl font-bold text-cyan-300 mb-6 border-l-4 border-cyan-400 pl-4">${phaseTitle}</h2>`;
+                
+                const weeksGrid = document.createElement('div');
+                weeksGrid.className = 'grid grid-cols-1 xl:grid-cols-2 gap-8';
 
-                Object.entries(weeks).forEach(([weekTitle, days]) => {
-                    const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    const weekCard = document.createElement('div');
-                    weekCard.className = 'bg-gray-800 rounded-2xl p-6 shadow-2xl flex flex-col border border-gray-700';
-                    
-                    let daysHtml = Object.entries(days).map(([dayTitle, tasks]) => {
-                        let tasksHtml = tasks.map(task => `
-                            <li class="flex items-start space-x-4 py-3">
-                                <input id="${task.id}" type="checkbox" class="h-5 w-5 rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-600 cursor-pointer mt-1 flex-shrink-0">
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <label for="${task.id}" class="font-semibold text-gray-100 cursor-pointer pr-2">${task.label}</label>
-                                        <div class="flex items-center flex-shrink-0">
-                                            <span class="text-xs text-gray-400 mr-2">${task.time}</span>
-                                            <button class="gemini-btn text-lg text-cyan-400 hover:text-cyan-200 leading-none" data-task-label="${task.label}" data-task-details="${task.details.replace(/"/g, '&quot;')}" title="✨ Get AI Help">✨</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm mt-1 details">${task.details}</p>
-                                </div>
-                            </li>
-                        `).join('');
+                Object.entries(weeks).forEach(([weekTitle, days]) => {
+                    const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    const weekCard = document.createElement('div');
+                    weekCard.className = 'bg-gray-800 rounded-2xl p-6 shadow-2xl flex flex-col border border-gray-700';
+                    
+                    let daysHtml = Object.entries(days).map(([dayTitle, tasks]) => {
+                        let tasksHtml = tasks.map(task => `
+                            <li class="flex items-start space-x-4 py-3">
+                                <input id="${task.id}" type="checkbox" class="h-5 w-5 rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-600 cursor-pointer mt-1 flex-shrink-0">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <label for="${task.id}" class="font-semibold text-gray-100 cursor-pointer pr-2">${task.label}</label>
+                                        <div class="flex items-center flex-shrink-0">
+                                            <span class="text-xs text-gray-400 mr-2">${task.time}</span>
+                                            <button class="gemini-btn text-lg text-cyan-400 hover:text-cyan-200 leading-none" data-task-label="${task.label}" data-task-details="${task.details.replace(/"/g, '&quot;')}" title="✨ Get AI Help">✨</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm mt-1 details">${task.details}</p>
+                                </div>
+                            </li>
+                        `).join('');
 
-                        return `
-                            <div>
-                                <h4 class="font-bold text-lg text-gray-300 mt-4 mb-2 border-b border-gray-700 pb-1">${dayTitle}</h4>
-                                <ul class="divide-y divide-gray-700/50">
-                                    ${tasksHtml}
-                                </ul>
-                            </div>
-                        `;
-                    }).join('');
+                        return `
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-300 mt-4 mb-2 border-b border-gray-700 pb-1">${dayTitle}</h4>
+                                <ul class="divide-y divide-gray-700/50">
+                                    ${tasksHtml}
+                                </ul>
+                            </div>
+                        `;
+                    }).join('');
 
-                    weekCard.innerHTML = `
-                        <h3 class="text-xl font-bold text-cyan-300 mb-2">${weekTitle}</h3>
-                        <div class="mb-4">
-                            <div class="bg-gray-700 rounded-full h-2.5">
-                                <div id="progress-bar-${weekId}" class="bg-cyan-400 h-2.5 rounded-full progress-bar-inner"></div>
-                            </div>
-                            <p id="progress-text-${weekId}" class="text-center text-xs mt-1 text-gray-400"></p>
-                        </div>
-                        <div class="space-y-4 flex-grow overflow-y-auto" style="max-height: 600px;">
-                           ${daysHtml}
-                        </div>
-                    `;
-                    weeksGrid.appendChild(weekCard);
-                });
-                phaseContainer.appendChild(weeksGrid);
-                planContainer.appendChild(phaseContainer);
-            });
-        }
+                    weekCard.innerHTML = `
+                        <h3 class="text-xl font-bold text-cyan-300 mb-2">${weekTitle}</h3>
+                        <div class="mb-4">
+                            <div class="bg-gray-700 rounded-full h-2.5">
+                                <div id="progress-bar-${weekId}" class="bg-cyan-400 h-2.5 rounded-full progress-bar-inner"></div>
+                            </div>
+                            <p id="progress-text-${weekId}" class="text-center text-xs mt-1 text-gray-400"></p>
+                        </div>
+                        <div class="space-y-4 flex-grow overflow-y-auto" style="max-height: 600px;">
+                           ${daysHtml}
+                        </div>
+                    `;
+                    weeksGrid.appendChild(weekCard);
+                });
+                phaseContainer.appendChild(weeksGrid);
+                planContainer.appendChild(phaseContainer);
+            });
+        }
 
-        function showPhase(phaseNum) {
-            // Hide all phase content
-            document.querySelectorAll('.phase-content').forEach(el => el.classList.add('hidden'));
-            // Show the selected one
-            const activePhaseContent = document.getElementById(`phase-${phaseNum}-content`);
-            if (activePhaseContent) {
-                activePhaseContent.classList.remove('hidden');
-            }
+        function showPhase(phaseNum) {
+            // Hide all phase content
+            document.querySelectorAll('.phase-content').forEach(el => el.classList.add('hidden'));
+            // Show the selected one
+            const activePhaseContent = document.getElementById(`phase-${phaseNum}-content`);
+            if (activePhaseContent) {
+                activePhaseContent.classList.remove('hidden');
+            }
 
-            // Update nav button styles
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.phase === phaseNum) {
-                    btn.classList.add('active');
-                }
-            });
-             // Save the last viewed phase
-            localStorage.setItem('lastActivePhase', phaseNum);
-        }
-        
-        function updateAllUI() {
-            for (const taskId in taskStates) {
-                const checkbox = document.getElementById(taskId);
-                if (checkbox) {
-                    checkbox.checked = !!taskStates[taskId];
-                }
-            }
-            updateProgressBars();
-        }
+            // Update nav button styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.phase === phaseNum) {
+                    btn.classList.add('active');
+                }
+            });
+             // Save the last viewed phase
+            localStorage.setItem('lastActivePhase', phaseNum);
+        }
+        
+        function updateAllUI() {
+            for (const taskId in taskStates) {
+                const checkbox = document.getElementById(taskId);
+                if (checkbox) {
+                    checkbox.checked = !!taskStates[taskId];
+                }
+            }
+            updateProgressBars();
+        }
 
-        function updateProgressBars() {
-            let totalTasks = 0;
-            let totalCompleted = 0;
+        function updateProgressBars() {
+            let totalTasks = 0;
+            let totalCompleted = 0;
 
-            Object.values(planData).forEach(phase => {
-                Object.entries(phase).forEach(([weekTitle, weekData]) => {
-                    const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    let weekTasks = 0;
-                    let weekCompleted = 0;
+            Object.values(planData).forEach(phase => {
+                Object.entries(phase).forEach(([weekTitle, weekData]) => {
+                    const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    let weekTasks = 0;
+                    let weekCompleted = 0;
 
-                    Object.values(weekData).forEach(day => {
-                        day.forEach(task => {
-                            weekTasks++;
-                            if (taskStates[task.id]) {
-                                weekCompleted++;
-                            }
-                        });
-                    });
+                    Object.values(weekData).forEach(day => {
+                        day.forEach(task => {
+                            weekTasks++;
+                            if (taskStates[task.id]) {
+                                weekCompleted++;
+                            }
+                        });
+                    });
 
-                    totalTasks += weekTasks;
-                    totalCompleted += weekCompleted;
+                    totalTasks += weekTasks;
+                    totalCompleted += weekCompleted;
 
-                    const percentage = weekTasks > 0 ? (weekCompleted / weekTasks) * 100 : 0;
-                    const progressBar = document.getElementById(`progress-bar-${weekId}`);
-                    const progressText = document.getElementById(`progress-text-${weekId}`);
+                    const percentage = weekTasks > 0 ? (weekCompleted / weekTasks) * 100 : 0;
+                    const progressBar = document.getElementById(`progress-bar-${weekId}`);
+                    const progressText = document.getElementById(`progress-text-${weekId}`);
 
-                    if (progressBar) progressBar.style.width = `${percentage}%`;
-                    if (progressText) progressText.textContent = `${weekCompleted} / ${weekTasks} tasks completed`;
-                });
-            });
+                    if (progressBar) progressBar.style.width = `${percentage}%`;
+                    if (progressText) progressText.textContent = `${weekCompleted} / ${weekTasks} tasks completed`;
+                });
+            });
 
-            const overallPercentage = totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0;
-            if(overallProgressBar) overallProgressBar.style.width = `${overallPercentage}%`;
-            if(overallProgressText) overallProgressText.textContent = `Total Progress: ${totalCompleted} of ${totalTasks} tasks completed (${overallPercentage.toFixed(1)}%)`;
-        }
+            const overallPercentage = totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0;
+            if(overallProgressBar) overallProgressBar.style.width = `${overallPercentage}%`;
+            if(overallProgressText) overallProgressText.textContent = `Total Progress: ${totalCompleted} of ${totalTasks} tasks completed (${overallPercentage.toFixed(1)}%)`;
+        }
 
-        // --- GEMINI  & MODAL LOGIC ---
-        
-        // **IMPORTANT**: PASTE YOUR GEMINI  KEY HERE
-        const GEMINI_API_KEY = "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw";
+        // --- GEMINI  & MODAL LOGIC ---
+        
+        // **IMPORTANT**: PASTE YOUR GEMINI  KEY HERE
+        const GEMINI_API_KEY = "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw";
 
-        function simpleMarkdownToHtml(text) {
-             return text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/(\r\n|\n|\r)/gm, "\n") // Standardize line breaks
-                .split('\n')
-                .map(line => {
-                    if (line.startsWith('#### ')) return `<h4>${line.substring(5)}</h4>`;
-                    if (line.startsWith('### ')) return `<h3>${line.substring(4)}</h3>`;
-                    if (line.startsWith('## ')) return `<h2>${line.substring(3)}</h2>`;
-                    if (line.startsWith('* ')) return `<li>${line.substring(2)}</li>`;
-                    if (line.trim() === '') return '<br>';
-                    return `<p>${line}</p>`;
-                })
-                .join('')
-                .replace(/<\/ul\>\s*?<ul>/g, ''); // Join adjacent lists
-        }
+        function simpleMarkdownToHtml(text) {
+             return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/(\r\n|\n|\r)/gm, "\n") // Standardize line breaks
+                .split('\n')
+                .map(line => {
+                    if (line.startsWith('#### ')) return `<h4>${line.substring(5)}</h4>`;
+                    if (line.startsWith('### ')) return `<h3>${line.substring(4)}</h3>`;
+                    if (line.startsWith('## ')) return `<h2>${line.substring(3)}</h2>`;
+                    if (line.startsWith('* ')) return `<li>${line.substring(2)}</li>`;
+                    if (line.trim() === '') return '<br>';
+                    return `<p>${line}</p>`;
+                })
+                .join('')
+                .replace(/<\/ul\>\s*?<ul>/g, ''); // Join adjacent lists
+        }
 
 
-        async function getAiHelp(taskLabel, taskDetails) {
-            geminiResponseEl.innerHTML = '';
-            geminiLoading.classList.remove('hidden');
+        async function getAiHelp(taskLabel, taskDetails) {
+            geminiResponseEl.innerHTML = '';
+            geminiLoading.classList.remove('hidden');
 
-            if (GEMINI_API_KEY === "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw") {
-                geminiResponseEl.innerHTML = '<p class="text-red-400"><strong>Configuration Error:</strong> Please add your Gemini API Key to the index.html file to enable the AI Assistant.</p>';
-                geminiLoading.classList.add('hidden');
-                return;
-            }
+            if (GEMINI_API_KEY === "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw") {
+                geminiResponseEl.innerHTML = '<p class="text-red-400"><strong>Configuration Error:</strong> Please add your Gemini API Key to the index.html file to enable the AI Assistant.</p>';
+                geminiLoading.classList.add('hidden');
+                return;
+            }
 
-            let prompt;
-            const lowerCaseLabel = taskLabel.toLowerCase();
+            let prompt;
+            const lowerCaseLabel = taskLabel.toLowerCase();
 
-            if (lowerCaseLabel.includes('project') || lowerCaseLabel.includes('brainstorm') || lowerCaseLabel.includes('challenge')) {
-                prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan and needs to start a portfolio project or challenge. Break down the following task into smaller, manageable steps. Suggest the types of datasets they should look for (if applicable) and what key sections to include in their final analysis or report. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
-            } else if (lowerCaseLabel.includes('behavioral') || lowerCaseLabel.includes('pitch')) {
-                 prompt = `You are an expert career coach for data analysts. A student is preparing for interviews and needs help with behavioral questions. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Explain how to approach this task effectively, focusing on the STAR method (Situation, Task, Action, Result). Provide a clear, concrete example of a STAR method response related to a data analysis project or task. Format your response using simple Markdown with headers and bullet points.`;
-            } else {
-                prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan. Explain the following task to them clearly and concisely. Focus on **why** this task is important for a data analyst and provide **actionable first steps**. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
-            }
+            if (lowerCaseLabel.includes('project') || lowerCaseLabel.includes('brainstorm') || lowerCaseLabel.includes('challenge')) {
+                prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan and needs to start a portfolio project or challenge. Break down the following task into smaller, manageable steps. Suggest the types of datasets they should look for (if applicable) and what key sections to include in their final analysis or report. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
+            } else if (lowerCaseLabel.includes('behavioral') || lowerCaseLabel.includes('pitch')) {
+                 prompt = `You are an expert career coach for data analysts. A student is preparing for interviews and needs help with behavioral questions. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Explain how to approach this task effectively, focusing on the STAR method (Situation, Task, Action, Result). Provide a clear, concrete example of a STAR method response related to a data analysis project or task. Format your response using simple Markdown with headers and bullet points.`;
+            } else {
+                prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan. Explain the following task to them clearly and concisely. Focus on **why** this task is important for a data analyst and provide **actionable first steps**. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
+            }
 
-            try {
-                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                const payload = { contents: chatHistory };
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-                if (!response.ok) {
-                    throw new Error(`API request failed with status ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                let text = 'No response found.';
-                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-                    text = result.candidates[0].content.parts[0].text;
-                }
-                geminiResponseEl.innerHTML = simpleMarkdownToHtml(text);
-
-            } catch (error) {
-                console.error("Gemini API call failed:", error);
-                geminiResponseEl.innerHTML = '<p class="text-red-400">Sorry, there was an error getting help from the AI assistant. Please check the console for details.</p>';
-            } finally {
-                geminiLoading.classList.add('hidden');
-            }
-        }
-
-        // --- EVENT HANDLERS ---
-        document.getElementById('app').addEventListener('click', (event) => {
-            const geminiButton = event.target.closest('.gemini-btn');
-            if (geminiButton) {
-                const taskLabel = geminiButton.dataset.taskLabel;
-                const taskDetails = geminiButton.dataset.taskDetails;
-                geminiModal.classList.remove('hidden');
-                getAiHelp(taskLabel, taskDetails);
-            }
-        });
-        
-        document.getElementById('app').addEventListener('change', (event) => {
-            if (event.target.type === 'checkbox') {
-                const taskId = event.target.id;
-                const isCompleted = event.target.checked;
-                taskStates[taskId] = isCompleted;
-                updateTaskState(taskId, isCompleted);
-                updateProgressBars();
-            }
-        });
-        
-        navContainer.addEventListener('click', (event) => {
-            const navButton = event.target.closest('.nav-btn');
-            if (navButton) {
-                showPhase(navButton.dataset.phase);
-            }
-        });
-
-        resetButton.addEventListener('click', () => resetModal.classList.remove('hidden'));
-        cancelReset.addEventListener('click', () => resetModal.classList.add('hidden'));
-        confirmReset.addEventListener('click', () => {
-            resetAllProgress();
-            resetModal.classList.add('hidden');
-        });
-        
-        closeGeminiModalBtn.addEventListener('click', () => geminiModal.classList.add('hidden'));
-        geminiModal.addEventListener('click', (event) => {
-            if (event.target === geminiModal) {
-                 geminiModal.classList.add('hidden');
-            }
-        });
-
-        // Initialize the application when the page loads
-        initializeAppAndAuth();
-
-    </script>
-</body>
-</html>
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+          
