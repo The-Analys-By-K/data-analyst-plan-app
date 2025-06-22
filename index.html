@@ -382,7 +382,7 @@
         // --- FIREBASE SETUP ---
         // Replace this with your own Firebase project configuration
         const firebaseConfig = {
-          Key: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
+          apiKey: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
           authDomain: "my-data-plan-tracker.firebaseapp.com",
           projectId: "my-data-plan-tracker",
           storageBucket: "my-data-plan-tracker.appspot.com",
@@ -610,10 +610,10 @@
             if(overallProgressText) overallProgressText.textContent = `Total Progress: ${totalCompleted} of ${totalTasks} tasks completed (${overallPercentage.toFixed(1)}%)`;
         }
 
-        // --- GEMINI  & MODAL LOGIC ---
+        // --- GEMINI API & MODAL LOGIC ---
         
         // **IMPORTANT**: PASTE YOUR GEMINI API KEY HERE
-        const GEMINI_API_KEY = "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw";
+        const GEMINI_API_KEY = "PASTE_YOUR_API_KEY_HERE";
 
         function simpleMarkdownToHtml(text) {
              return text
@@ -637,7 +637,7 @@
             geminiResponseEl.innerHTML = '';
             geminiLoading.classList.remove('hidden');
 
-            if (GEMINI_API_KEY == "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw") {
+            if (GEMINI_API_KEY === "PASTE_YOUR_API_KEY_HERE") {
                 geminiResponseEl.innerHTML = '<p class="text-red-400"><strong>Configuration Error:</strong> Please add your Gemini API Key to the index.html file to enable the AI Assistant.</p>';
                 geminiLoading.classList.add('hidden');
                 return;
