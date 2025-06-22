@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,113 +11,88 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            /* Darker bg for contrast */
+            background-color: #111827; /* Darker bg for contrast */
         }
-
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
             width: 8px;
         }
-
         ::-webkit-scrollbar-track {
             background: #1f2937;
         }
-
         ::-webkit-scrollbar-thumb {
             background: #4b5563;
             border-radius: 10px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: #6b7280;
         }
-
         .progress-bar-inner {
             transition: width 0.5s ease-in-out;
         }
-
         .details {
-            color: #d1d5db;
-            /* Lighter gray for details */
-            padding-left: 0.75rem;
-            border-left: 2px solid #374151;
+             color: #d1d5db; /* Lighter gray for details */
+             padding-left: 0.75rem;
+             border-left: 2px solid #374151;
         }
-
         .details strong {
-            color: #93c5fd;
-            /* Light blue for emphasis */
+            color: #93c5fd; /* Light blue for emphasis */
         }
-
         /* Styles for Gemini Modal Response */
         #gemini-response h4 {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #67e8f9;
-            /* Cyan */
+            color: #67e8f9; /* Cyan */
             margin-top: 1rem;
             margin-bottom: 0.5rem;
         }
-
         #gemini-response ul {
             list-style-type: disc;
             padding-left: 1.5rem;
             margin-bottom: 1rem;
         }
-
-        #gemini-response li {
+         #gemini-response li {
             margin-bottom: 0.5rem;
         }
-
         #gemini-response p {
-            margin-bottom: 0.75rem;
+             margin-bottom: 0.75rem;
         }
-
         #gemini-response strong {
             color: #e5e7eb;
         }
-
         .nav-btn.active {
-            background-color: #0891b2;
-            /* Cyan-600 */
+            background-color: #0891b2; /* Cyan-600 */
             color: #ffffff;
         }
     </style>
 </head>
-
 <body class="text-white antialiased">
 
     <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-screen-2xl">
 
         <!-- Header -->
         <header class="mb-8 text-center">
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2">Your 12-Week Intensive Data
-                Analyst Job Plan</h1>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2">Your 12-Week Intensive Data Analyst Job Plan</h1>
             <p class="text-lg text-gray-400">Track your journey from skill-building to job offer.</p>
             <div id="user-info" class="mt-4 text-xs text-gray-500">
-                <p>Loading user data...</p>
+                <p>Connecting to database...</p>
             </div>
         </header>
 
         <!-- Overall Progress -->
-        <div
-            class="mb-6 sticky top-4 z-20 bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-700">
+        <div class="mb-6 sticky top-4 z-20 bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-700">
             <h2 class="text-xl font-semibold mb-3 text-center">Overall Progress</h2>
             <div class="bg-gray-700 rounded-full h-4">
-                <div id="overall-progress-bar"
-                    class="bg-gradient-to-r from-cyan-500 to-blue-500 h-4 rounded-full progress-bar-inner"></div>
+                <div id="overall-progress-bar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-4 rounded-full progress-bar-inner"></div>
             </div>
             <p id="overall-progress-text" class="text-center text-sm mt-2 text-gray-300">Calculating...</p>
         </div>
 
         <!-- Navigation Tabs -->
         <nav class="mb-8 flex justify-center space-x-2 sm:space-x-4 bg-gray-800 p-2 rounded-xl">
-            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
-                data-phase="1">Phase 1: Foundation & Brand</button>
-            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
-                data-phase="2">Phase 2: Application Offensive</button>
-            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
-                data-phase="3">Phase 3: Closing the Deal</button>
+            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200" data-phase="1">Phase 1: Foundation & Brand</button>
+            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200" data-phase="2">Phase 2: Application Offensive</button>
+            <button class="nav-btn flex-1 py-2 px-4 rounded-lg font-semibold transition-colors duration-200" data-phase="3">Phase 3: Closing the Deal</button>
         </nav>
 
         <!-- Main Content Grid -->
@@ -128,46 +102,36 @@
 
         <!-- Action Buttons -->
         <div class="mt-16 text-center">
-            <button id="reset-button"
-                class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300 shadow-md">
+            <button id="reset-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300 shadow-md">
                 Reset All Progress
             </button>
         </div>
     </div>
-
+    
     <!-- Reset Confirmation Modal -->
     <div id="reset-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
         <div class="bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full border border-gray-700">
             <h3 class="text-2xl font-bold mb-4">Are you sure?</h3>
-            <p class="text-gray-300 mb-6">This will permanently reset all your progress. This action cannot be undone.
-            </p>
+            <p class="text-gray-300 mb-6">This will permanently reset all your progress. This action cannot be undone.</p>
             <div class="flex justify-end gap-4">
-                <button id="cancel-reset"
-                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Cancel</button>
-                <button id="confirm-reset"
-                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Yes, Reset</button>
+                <button id="cancel-reset" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button id="confirm-reset" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Yes, Reset</button>
             </div>
         </div>
     </div>
-
+    
     <!-- Gemini AI Modal -->
-    <div id="gemini-modal"
-        class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-gray-800 rounded-lg p-6 shadow-2xl max-w-2xl w-full border border-gray-700 flex flex-col"
-            style="max-height: 90vh;">
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 shadow-2xl max-w-2xl w-full border border-gray-700 flex flex-col" style="max-height: 90vh;">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
                 <h3 id="gemini-modal-title" class="text-2xl font-bold text-cyan-400">✨ AI Assistant</h3>
                 <button id="close-gemini-modal" class="text-gray-400 hover:text-white text-3xl">&times;</button>
             </div>
             <div id="gemini-modal-content" class="text-gray-300 mb-6 overflow-y-auto">
                 <div id="gemini-loading" class="flex items-center justify-center p-8 hidden">
-                    <svg class="animate-spin h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
+                    <svg class="animate-spin h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     <p class="ml-4">Generating insights...</p>
                 </div>
@@ -179,7 +143,7 @@
     <script type="module">
         // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, updateDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- DATA STRUCTURE (WITH NAMED RESOURCES) ---
@@ -211,7 +175,7 @@
                         { id: "p1_w1_d5_t2", time: "1pm-3pm", label: "Mini-Project Brainstorm", details: "Find a dataset on <strong>Kaggle Datasets</strong> to build a small project around a skill gap (e.g., A/B Testing)." },
                         { id: "p1_w1_d5_t3", time: "3pm-5pm", label: "Planning & Review", details: "Review your week. What was most challenging? Plan your focus for Week 2." }
                     ],
-                    "Weekend": [
+                     "Weekend": [
                         { id: "p1_w1_d6_t1", time: "Focus", label: "Catch up & Deploy", details: "Rest, catch up, and deploy at least one Plotly dashboard online." }
                     ]
                 },
@@ -275,7 +239,7 @@
                         { id: "p1_w3_d6_t1", time: "Focus", label: "Rest & Read", details: "Rest. Read a book or listen to a podcast on data storytelling or business strategy." }
                     ]
                 },
-                "Week 4: Business Acumen & Final Prep": {
+                 "Week 4: Business Acumen & Final Prep": {
                     "Monday": [
                         { id: "p1_w4_d1_t1", time: "9am-12pm", label: "Cloud Fundamentals - AWS/GCP", details: "Create a free tier account. Learn to upload a CSV to AWS S3. Use the <strong>AWS S3 Intro Guide</strong>." },
                         { id: "p1_w4_d1_t2", time: "1pm-3pm", label: "Cloud Databases - BigQuery/Redshift", details: "Load your mini-project dataset into BigQuery and run SQL queries. Use the <strong>Google Cloud BigQuery Quickstart</strong>." },
@@ -328,7 +292,7 @@
                     ]
                 },
                 "Week 6: Building Momentum": {
-                    "Monday": [
+                     "Monday": [
                         { id: "p2_w6_d1_t1", time: "9am-11am", label: "Application & Follow-up", details: "Apply to 5-7 new roles. Follow up on 3 applications from last week via polite email or LinkedIn message." },
                         { id: "p2_w6_d1_t2", time: "11am-1pm", label: "Informational Interviews", details: "Send out 5 requests for a 15-minute virtual coffee chat to learn about a role or company." },
                         { id: "p2_w6_d1_t3", time: "2pm-4pm", label: "Technical Practice", details: "2 Hard SQL problems. 1 Python stats problem." },
@@ -340,7 +304,7 @@
                         { id: "p2_w6_d2_t3", time: "2pm-4pm", label: "Case Study Practice", details: "Work through another business case study. Create a mock presentation of your findings." },
                         { id: "p2_w6_d2_t4", time: "4pm-5pm", label: "Tracking", details: "Update tracker." }
                     ],
-                    "Wed-Fri": [
+                     "Wed-Fri": [
                         { id: "p2_w6_d3_t1", time: "Repeat", label: "Repeat & Refine", details: "Continue the cycle. If you get recruiter calls, a new task is 'Recruiter Screen Prep'. Research the company before every call." }
                     ],
                     "Weekend": [
@@ -360,12 +324,12 @@
             },
             "Phase 3: Closing the Deal (Weeks 9-12)": {
                 "Week 9: Technical & Take-Home Challenges": {
-                    "Monday": [
+                     "Monday": [
                         { id: "p3_w9_d1_t1", time: "9am-12pm", label: "Mock Technical Screen", details: "Have a friend give you a timed, live SQL & Python screen. Use a tool like <strong>CoderPad</strong>." },
                         { id: "p3_w9_d1_t2", time: "1pm-4pm", label: "Take-Home Challenge Practice", details: "Find data analyst take-home assignments online. Complete one under timed conditions. Use guides from <strong>Interview Query</strong>." },
                         { id: "p3_w9_d1_t3", time: "4pm-5pm", label: "Application Maintenance", details: "Apply to 3-5 roles to keep the pipeline warm." }
                     ],
-                    "Tuesday": [
+                     "Tuesday": [
                         { id: "p3_w9_d2_t1", time: "9am-12pm", label: "Deep Dive: Specific Company", details: "If you have a technical interview, research their product. Formulate hypotheses about their data." },
                         { id: "p3_w9_d2_t2", time: "1pm-4pm", label: "Project Presentation Practice", details: "Present one of your portfolio projects as if in a final-round interview. Record yourself." },
                         { id: "p3_w9_d2_t3", time: "4pm-5pm", label: "Follow-ups", details: "Send thank-you notes for any interviews from the previous week." }
@@ -405,58 +369,53 @@
         const confirmReset = document.getElementById('confirm-reset');
         const userInfoDiv = document.getElementById('user-info');
         const navContainer = document.querySelector('nav');
-
+        
         // Gemini Modal Elements
         const geminiModal = document.getElementById('gemini-modal');
         const closeGeminiModalBtn = document.getElementById('close-gemini-modal');
         const geminiLoading = document.getElementById('gemini-loading');
         const geminiResponseEl = document.getElementById('gemini-response');
-
+        
         let db, auth, userId, isAuthReady = false;
         let taskStates = {};
 
         // --- FIREBASE SETUP ---
+        // Replace this with your own Firebase project configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
-            authDomain: "my-data-plan-tracker.firebaseapp.com",
-            projectId: "my-data-plan-tracker",
-            storageBucket: "my-data-plan-tracker.firebasestorage.app",
-            messagingSenderId: "63645797673",
-            appId: "1:63645797673:web:a53c4adbcdf4225981bb38"
+          apiKey: "AIzaSyBI1lyRewFo1Mo4pUgQLLaECNjc39thug4",
+          authDomain: "my-data-plan-tracker.firebaseapp.com",
+          projectId: "my-data-plan-tracker",
+          storageBucket: "my-data-plan-tracker.appspot.com",
+          messagingSenderId: "63645797673",
+          appId: "1:63645797673:web:a53c4adbcdf4225981bb38"
         };
-        const appId = 'my-data-plan-tracker'; // Use your projectId here
-        const DOC_NAME = 'data-analyst-plan-12-week-v8'; // New version for multi-page layout
+        const appId = firebaseConfig.projectId; // Use projectId for consistency
+        const DOC_NAME = 'data-analyst-plan-12-week-v9-permanent'; // New version
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            setLogLevel('debug');
-        } catch (e) {
-            console.error("Firebase initialization failed:", e);
-            userInfoDiv.innerHTML = `<p class="text-red-400">Error: Could not connect to the database.</p>`;
-        }
+        // --- AUTHENTICATION & INITIALIZATION ---
+        async function initializeAppAndAuth() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
+                // Hardcoded credentials for permanent login
+                const email = "user@example.com";
+                const password = "password123";
+
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                userId = userCredential.user.uid;
                 isAuthReady = true;
-                userInfoDiv.innerHTML = `<p>UserID: ${userId}</p><p>Status: Connected</p>`;
+                userInfoDiv.innerHTML = `<p>User ID: ${userId}</p><p>Status: Logged In Permanently</p>`;
                 await loadAndListenForTasks();
-            } else {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed:", error);
-                    userInfoDiv.innerHTML = `<p class="text-red-400">Authentication failed. Your progress cannot be saved.</p>`;
-                }
-            }
-        });
 
+            } catch (error) {
+                console.error("Permanent login failed:", error);
+                userInfoDiv.innerHTML = `<p class="text-red-400">Login Failed. Please ensure you have created the user (user@example.com / password123) in your Firebase Authentication panel.</p>`;
+            }
+        }
+        
         // --- DATA HANDLING ---
         function getInitialTaskStates() {
             const initialState = {};
@@ -471,11 +430,11 @@
             });
             return initialState;
         }
-
+        
         async function loadAndListenForTasks() {
             if (!isAuthReady || !userId) return;
             const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
-
+            
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     taskStates = docSnap.data().tasks || {};
@@ -486,7 +445,7 @@
                 }
                 renderPlan();
                 updateAllUI();
-                // Show the initial phase after data is loaded
+                 // Show the initial phase after data is loaded
                 const lastPhase = localStorage.getItem('lastActivePhase') || '1';
                 showPhase(lastPhase);
             }, (error) => {
@@ -494,7 +453,7 @@
                 userInfoDiv.innerHTML += `<p class="text-red-400">Error listening for real-time updates.</p>`;
             });
         }
-
+        
         async function updateTaskState(taskId, isCompleted) {
             if (!isAuthReady || !userId) return;
             const docRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${DOC_NAME}`);
@@ -528,9 +487,9 @@
                 const phaseContainer = document.createElement('div');
                 phaseContainer.id = `phase-${phaseNum}-content`;
                 phaseContainer.className = 'phase-content space-y-12 hidden'; // Initially hidden
-
+                
                 phaseContainer.innerHTML = `<h2 class="text-3xl font-bold text-cyan-300 mb-6 border-l-4 border-cyan-400 pl-4">${phaseTitle}</h2>`;
-
+                
                 const weeksGrid = document.createElement('div');
                 weeksGrid.className = 'grid grid-cols-1 xl:grid-cols-2 gap-8';
 
@@ -538,7 +497,7 @@
                     const weekId = weekTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
                     const weekCard = document.createElement('div');
                     weekCard.className = 'bg-gray-800 rounded-2xl p-6 shadow-2xl flex flex-col border border-gray-700';
-
+                    
                     let daysHtml = Object.entries(days).map(([dayTitle, tasks]) => {
                         let tasksHtml = tasks.map(task => `
                             <li class="flex items-start space-x-4 py-3">
@@ -601,10 +560,10 @@
                     btn.classList.add('active');
                 }
             });
-            // Save the last viewed phase
+             // Save the last viewed phase
             localStorage.setItem('lastActivePhase', phaseNum);
         }
-
+        
         function updateAllUI() {
             for (const taskId in taskStates) {
                 const checkbox = document.getElementById(taskId);
@@ -647,13 +606,13 @@
             });
 
             const overallPercentage = totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0;
-            if (overallProgressBar) overallProgressBar.style.width = `${overallPercentage}%`;
-            if (overallProgressText) overallProgressText.textContent = `Total Progress: ${totalCompleted} of ${totalTasks} tasks completed (${overallPercentage.toFixed(1)}%)`;
+            if(overallProgressBar) overallProgressBar.style.width = `${overallPercentage}%`;
+            if(overallProgressText) overallProgressText.textContent = `Total Progress: ${totalCompleted} of ${totalTasks} tasks completed (${overallPercentage.toFixed(1)}%)`;
         }
 
         // --- GEMINI API & MODAL LOGIC ---
         function simpleMarkdownToHtml(text) {
-            return text
+             return text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/(\r\n|\n|\r)/gm, "\n") // Standardize line breaks
                 .split('\n')
@@ -680,7 +639,7 @@
             if (lowerCaseLabel.includes('project') || lowerCaseLabel.includes('brainstorm') || lowerCaseLabel.includes('challenge')) {
                 prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan and needs to start a portfolio project or challenge. Break down the following task into smaller, manageable steps. Suggest the types of datasets they should look for (if applicable) and what key sections to include in their final analysis or report. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
             } else if (lowerCaseLabel.includes('behavioral') || lowerCaseLabel.includes('pitch')) {
-                prompt = `You are an expert career coach for data analysts. A student is preparing for interviews and needs help with behavioral questions. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Explain how to approach this task effectively, focusing on the STAR method (Situation, Task, Action, Result). Provide a clear, concrete example of a STAR method response related to a data analysis project or task. Format your response using simple Markdown with headers and bullet points.`;
+                 prompt = `You are an expert career coach for data analysts. A student is preparing for interviews and needs help with behavioral questions. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Explain how to approach this task effectively, focusing on the STAR method (Situation, Task, Action, Result). Provide a clear, concrete example of a STAR method response related to a data analysis project or task. Format your response using simple Markdown with headers and bullet points.`;
             } else {
                 prompt = `You are an expert career coach for data analysts. A student is working on a 12-week intensive learning plan. Explain the following task to them clearly and concisely. Focus on **why** this task is important for a data analyst and provide **actionable first steps**. The task is: '${taskLabel}' with details: '${taskDetails.replace(/<[^>]*>?/gm, '')}'. Format your response using simple Markdown with headers and bullet points.`;
             }
@@ -700,9 +659,9 @@
                 if (!response.ok) {
                     throw new Error(`API request failed with status ${response.status}`);
                 }
-
+                
                 const result = await response.json();
-
+                
                 let text = 'No response found.';
                 if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                     text = result.candidates[0].content.parts[0].text;
@@ -718,7 +677,6 @@
         }
 
         // --- EVENT HANDLERS ---
-        // Using a single listener on the app container for efficiency
         document.getElementById('app').addEventListener('click', (event) => {
             const geminiButton = event.target.closest('.gemini-btn');
             if (geminiButton) {
@@ -728,7 +686,7 @@
                 getAiHelp(taskLabel, taskDetails);
             }
         });
-
+        
         document.getElementById('app').addEventListener('change', (event) => {
             if (event.target.type === 'checkbox') {
                 const taskId = event.target.id;
@@ -738,7 +696,7 @@
                 updateProgressBars();
             }
         });
-
+        
         navContainer.addEventListener('click', (event) => {
             const navButton = event.target.closest('.nav-btn');
             if (navButton) {
@@ -752,15 +710,17 @@
             resetAllProgress();
             resetModal.classList.add('hidden');
         });
-
+        
         closeGeminiModalBtn.addEventListener('click', () => geminiModal.classList.add('hidden'));
         geminiModal.addEventListener('click', (event) => {
             if (event.target === geminiModal) {
-                geminiModal.classList.add('hidden');
+                 geminiModal.classList.add('hidden');
             }
         });
 
+        // Initialize the application when the page loads
+        initializeAppAndAuth();
+
     </script>
 </body>
-
 </html>
