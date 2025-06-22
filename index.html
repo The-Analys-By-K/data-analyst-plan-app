@@ -613,7 +613,7 @@
         // --- GEMINI API & MODAL LOGIC ---
         
         // **IMPORTANT**: PASTE YOUR GEMINI API KEY HERE
-        const GEMINI_API_KEY = "PASTE_YOUR_API_KEY_HERE";
+        const GEMINI_API_KEY = "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw";
 
         function simpleMarkdownToHtml(text) {
              return text
@@ -637,7 +637,7 @@
             geminiResponseEl.innerHTML = '';
             geminiLoading.classList.remove('hidden');
 
-            if (GEMINI_API_KEY === "PASTE_YOUR_API_KEY_HERE") {
+            if (GEMINI_API_KEY === "AIzaSyD9F0JOHVP8ZuJitA2e0rM7eYJDlMbn4qw") {
                 geminiResponseEl.innerHTML = '<p class="text-red-400"><strong>Configuration Error:</strong> Please add your Gemini API Key to the index.html file to enable the AI Assistant.</p>';
                 geminiLoading.classList.add('hidden');
                 return;
